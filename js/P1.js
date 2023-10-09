@@ -22,8 +22,6 @@ function init() {
     // camera.position.set( 0.5, 50 , 50 )
     camera.lookAt( 0, 1, 1 ) 
 
-    const aspectRatio = window.innerWidth/window.innerHeight;
-    setOrtoCameras(aspectRatio);
     
     const controls = new OrbitControls(camera, renderer.domElement);
 
