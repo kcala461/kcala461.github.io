@@ -158,7 +158,7 @@ function loadScene() {
 
 function render() {
     requestAnimationFrame( render )
-    update()
+    // update()
     renderer.render( scene, camera )
 }
 
