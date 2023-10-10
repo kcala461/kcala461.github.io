@@ -1,6 +1,6 @@
 // Módulos necesarios
-// import * as THREE from "../lib/three.module.js"
-// import { OrbitControls } from "../lib/OrbitControls.module.js"
+import * as THREE from "../lib/three.module.js"
+import { OrbitControls } from "../lib/OrbitControls.module.js"
 
 let renderer, scene, camera
 
