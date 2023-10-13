@@ -1,8 +1,14 @@
 // Módulos necesarios
-// import * as THREE from "../lib/three.module.js"
-import * as THREE  from "three"
+import * as THREE from "../lib/three.module.js"
+import { OrbitControls } from "../lib/OrbitControls.module.js"
+import { TWEEN } from "../lib/tween.module.min.js";
+import{GUI} from "../lib/lil-gui.module.min.js"
 
-let renderer, scene, camera, robot,suelo,brazo,antebrazo, rotula,  mano, mano_1, mano_2, base_cilindro;
+
+let renderer, scene, camera, robot, effectController,suelo,brazo,antebrazo, rotula,  mano, mano_1, mano_2, base_cilindro;
+
+// camara
+let cenital, L
 
 
 // Funciones
@@ -10,19 +16,31 @@ function init() {
     // Instanciar el motor de render
     renderer = new THREE.WebGLRenderer()
     renderer.setSize( window.innerWidth, window.innerHeight )
+    renderer.setClearColor(0xFFFFFF)
+    renderer.autoClear = false
     document.getElementById( 'container' ).appendChild( renderer.domElement )
 
     // Instanciar el nodo raíz de la escena
     scene = new THREE.Scene()
-    scene.background = new THREE.Color( 0.5, 0.5, 0.5 )
+    // scene.background = new THREE.Color( 0.5, 0.5, 0.5 )
+
 
     // Instanciar la cámara
-    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 )
-    camera.position.set( 0.5, 300, 300 )
-    // camera.position.set( 0.5, 50 , 50 )
-    camera.lookAt( 0, 1, 1 ) 
+    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 )
+    camera.position.set( 0.5, 300, 200 )
+    camera.lookAt( 0, 1, 0 ) 
 
+    // const aspectRatio = window.innerWidth/window.innerHeight;
+    // setOrtoCameras(aspectRatio);
     
+    const controls = new OrbitControls(camera, renderer.domElement);
+
+    // Camaras 
+    L = Math.min(window.innerWidth, window.innerHeight) / 4;
+    camaraCenital();
+
+    // Captura eventos
+    window.addEventListener('resize', updateAspectRatio);
 
 }
 
@@ -188,12 +206,61 @@ function loadScene() {
 
 }
 
-function render() {
-    requestAnimationFrame( render )
-    renderer.render( scene, camera )
+
+function render()
+{
+    requestAnimationFrame(render);
+
+    // update();
+    let side;
+    
+    const ar = window.innerWidth / window.innerHeight;
+    if(ar < 1) 
+        side = window.innerWidth/4;
+    else
+        side = window.innerHeight/4;
+
+    renderer.setViewport(0,0, window.innerWidth,window.innerHeight);
+    renderer.render(scene, camera);
+    renderer.setViewport(0, (window.innerHeight - side), side,side);
+    renderer.render(scene, cenital);
+
+
+
 }
 
+
+
+function updateAspectRatio() {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const ar = window.innerWidth / window.innerHeight;
+
+    camera.aspect = ar;
+    camera.updateProjectionMatrix();
+
+    L = Math.min(window.innerWidth, window.innerHeight) / 4;
+
+    cenital.left = -L/4;
+    cenital.right = L/4;
+    cenital.bottom = -L/4;
+    cenital.top = L/4;
+
+    cenital.updateProjectionMatrix();
+}
+
+function camaraCenital() {
+    const camaraOrto = new THREE.OrthographicCamera(-L/4, L/4, L/4, -L/4, -10, 300)
+
+    cenital = camaraOrto.clone();
+    cenital.position.set(0,250,0);
+    cenital.lookAt(0,0,0);
+    cenital.up = new THREE.Vector3(0,0,-1); 
+}
+
+
+
 // Acciones
-init()
-loadScene()
-render()
+init();
+loadScene();
+render();
