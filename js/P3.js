@@ -30,7 +30,7 @@ function init() {
 
     // Instanciar la cámara
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 )
-    camera.position.set( 0.5, 300, 200 )
+    camera.position.set( 0.5, 300, 300 )
     camera.lookAt( 0, 1, 0 ) 
 
     // const aspectRatio = window.innerWidth/window.innerHeight;
@@ -239,12 +239,30 @@ function render()
 
 function animate(){
     //capturar y normalizar
-    new TWEEN.Tween(robot.rotation).
-    to({x: [0,0],y:[Math.PI,-Math.PI/2],z:[0,0]},5000).
-    interpolation(TWEEN.Interpolation.Linear).
-    easing(TWEEN.Easing.Bounce.InOut).
-    start();
+   
+    new TWEEN.Tween(brazo.rotation).
+    to({x:[0,0], y:[0,0], z:[Math.PI*4]}, 9000).
+    interpolation(TWEEN.Interpolation.Linear).start()
 
+    new TWEEN.Tween(antebrazo.rotation).
+    to({x:[0,0], y:[0,0], z:[Math.PI/2]}, 9000).
+    interpolation(TWEEN.Interpolation.Bezier).start()
+
+    new TWEEN.Tween(antebrazo.rotation).
+    to({x:[0,0], y:[0,0], z:[Math.PI/2,0]}, 9000).
+    interpolation(TWEEN.Interpolation.Bezier).start()
+ 
+    new TWEEN.Tween(mano.rotation).
+    to({x:[0,0], y:[0,0], z:[-Math.PI*2]}, 9000).
+    interpolation(TWEEN.Interpolation.Bezier).start()
+
+    new TWEEN.Tween(mano_1.position).
+    to({x:[0,0], y:[0,0], z:[10,0,10]}, 9000).
+    interpolation(TWEEN.Interpolation.Linear).start()
+
+    new TWEEN.Tween(mano_2.position).
+    to({x:[0,0], y:[0,0], z:[-10,0,-10]}, 9000).
+    interpolation(TWEEN.Interpolation.Linear).start()
 }
 
 
