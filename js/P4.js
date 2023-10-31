@@ -75,7 +75,7 @@ function init() {
 
     scene.add(new THREE.CameraHelper(puntual.shadow.camera))
 
-    scene.add(new THREE.CameraHelper(focal.shadow.camera))
+    // scene.add(new THREE.CameraHelper(focal.shadow.camera))
     // scene.add(new THREE.CameraHelper(puntual.shadow.camera))
     // scene.add(new THREE.CameraHelper(direccional.shadow.camera))
 
