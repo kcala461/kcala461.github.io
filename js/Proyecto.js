@@ -344,7 +344,7 @@ function restartGame() {
     isGameOver = false;
     isGamePaused = false;
     score = 0;
-    cantidadNubesEtapa = 1;
+    cantidadNubesEtapa = 0;
     etapaGeneracionNubes = 0;
     tiempoJugado = 0;
     passedClouds.length = 0;
@@ -434,9 +434,9 @@ closeCreditsButton.addEventListener("click", () => {
     // Ocultar la pantalla de créditos
     creditsScreen.style.display = "none";
 
-    if (!isGamePaused) {
-        audioGame.play(); // Reanudar la música si el juego no estaba pausado
-    }
+    // if (!isGamePaused) {
+    //     audioGame.play(); // Reanudar la música si el juego no estaba pausado
+    // }
     isGamePaused = false; // Reanudar el juego
 });
 
@@ -444,9 +444,9 @@ closeCreditsButton2.addEventListener("click", () => {
     // Ocultar la pantalla de créditos
     instructionsScreen.style.display = "none";
 
-    if (!isGamePaused) {
-        audioGame.play(); // Reanudar la música si el juego no estaba pausado
-    }
+    // if (!isGamePaused) {
+    //     audioGame.play(); // Reanudar la música si el juego no estaba pausado
+    // }
     isGamePaused = false; // Reanudar el juego
 });
 
