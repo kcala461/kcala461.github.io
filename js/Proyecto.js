@@ -15,7 +15,17 @@ const cloudCorridorWidth = 200; // Ancho del pasillo
 const cloudCorridorLength = 500; // Largo del pasillo
 const audio = new Audio("../videos/sound.mp3");
 const audioBoton = new Audio("../videos/boton.mp3");
-const audioGame = new Audio("../videos/sonido.mp3");
+const audioGame = new Audio("../videos/fondo.mp3");
+const passedClouds = [];
+const initialScreen = document.getElementById("initial-screen");
+const playButton = document.getElementById("play-button");
+const creditsButton = document.getElementById("credits-button");
+const creditsScreen = document.getElementById("credits-screen");
+const closeCreditsButton = document.getElementById("close-credits-button");
+const closeCreditsButton2 = document.getElementById("close-credits-button2");
+
+const instructionsButton = document.getElementById("instructions-button");
+const instructionsScreen = document.getElementById("instructions-screen");
 
 const minX = -100; // Valor mínimo de X
 const maxX = 100; // Valor máximo de X
@@ -31,7 +41,7 @@ let isGamePaused = false;
 let tiempoJugado = 0; // Tiempo jugado en segundos
 let generacionNubesInterval = 5000; // Intervalo de generación de nubes en milisegundos (por ejemplo, cada 5 segundos)
 let etapaGeneracionNubes = 0; // Etapa actual de generación de nubes
-let cantidadNubesEtapa = 5; // Cantidad de nubes a generar en cada etapa
+let cantidadNubesEtapa = 1; // Cantidad de nubes a generar en cada etapa
 
 
 function init() {
@@ -53,18 +63,41 @@ function init() {
     // Inicializar sombras
     renderer.antialias = true;
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Opciones para el tipo de sombra
+
 
     // Crea una fuente de luz ambiental
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Color e intensidad
     scene.add(ambientLight);
 
     // Crea una fuente de luz direccional
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5); // Color e intensidad
-    directionalLight.position.set(1, 1, -1); // Posición de la luz
-    scene.add(directionalLight);
+    // const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5); // Color e intensidad
+    // directionalLight.position.set(1, 1, -1); // Posición de la luz
+    // scene.add(directionalLight);
 
     window.addEventListener("resize", onWindowResize);
     document.addEventListener("keydown", onDocumentKeyDown);
+
+    // Carga de las seis imágenes del cubemap (puedes ajustar las rutas a tus propias imágenes)
+    const cubemapTexture = new THREE.CubeTextureLoader()
+    .setPath('../images/fondo/') // Ruta a las imágenes del cubemap
+    .load(['bluecloud_lf.jpg', 'bluecloud_rt.jpg', 'bluecloud_up.jpg', 'bluecloud_dn.jpg', 'bluecloud_ft.jpg', 'bluecloud_bk.jpg']);
+
+    // Configura la textura de entorno en la escena
+    scene.background = cubemapTexture;
+
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    directionalLight.position.set(1, 1, -1);
+    directionalLight.castShadow = true; // Habilita la proyección de sombras
+    directionalLight.shadow.mapSize.width = 1024; // Resolución de la sombra
+    directionalLight.shadow.mapSize.height = 1024;
+    directionalLight.shadow.camera.left = -10; // Área de sombra
+    directionalLight.shadow.camera.right = 10;
+    directionalLight.shadow.camera.top = 10;
+    directionalLight.shadow.camera.bottom = -10;
+    scene.add(directionalLight);
+
 }
 
 function loadScene() {
@@ -80,52 +113,70 @@ function loadScene() {
     suelo.receiveShadow = true;
     scene.add(suelo);
     AudioMute()
-    avion = createPlane();
-    scene.add(avion);
+    
     generarNubesAdicionales()
     setInterval(generarNubesAdicionales, generacionNubesInterval);
 
-    // Crear nubes iniciales
-    // for (let i = 0; i < cloudCount; i++) {
-    //     createCloud();
-    // }
-    // const textureLoader = new THREE.TextureLoader();
-    // const backgroundTexture = textureLoader.load("../images/cloud1.png");
-    // const backgroundMaterial = new THREE.MeshBasicMaterial({ map: backgroundTexture });
-    // const backgroundGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
-    // const backgroundMesh = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
-    // backgroundMesh.scale.set(-1, 1, 1);
-    // scene.add(backgroundMesh);
-
-    letrero();
+    if (initialScreen.style.display === "none") {
+        letrero();
+    }   
+    if (initialScreen.style.display === "none") {
+        if (avion) {
+            scene.remove(avion);
+        }
+        avion = createPlane();
+        scene.add(avion);
+    }   
     audioGame.play();
 }
 
 function render() {
-    if (isGamePaused) {
-        return;
-    }
     requestAnimationFrame(render);
     tiempoJugado += 1 / 120;
-    for (let i = clouds.length - 1; i >= 0; i--) {
-        clouds[i].position.z -= speed;
 
-        if (clouds[i].position.z < -cloudCorridorLength) {
-            scene.remove(clouds[i]);
-            clouds.splice(i, 1);
-            createCloud();
-            score += 1;
-            speed = 1;
+    if (isGameOver) {
+        return; // No realices ninguna actualización si el juego está pausado
+    }
+
+    // Verifica si la pantalla de inicio es visible
+    if (initialScreen.style.display === "none") {
+        for (let i = clouds.length - 1; i >= 0; i--) {
+            const cloud = clouds[i];
+            cloud.position.z -= speed;
+
+            if (cloud.position.z < avion.position.z) {
+                if (!passedClouds.includes(cloud)) {
+                    passedClouds.push(cloud);
+                    score += 1;
+                }
+            }
+
+            if (cloud.position.z < -cloudCorridorLength) {
+                scene.remove(cloud);
+                clouds.splice(i, 1);
+                createCloud();
+            }
         }
+
+        if (tiempoJugado >= etapaGeneracionNubes * 300) {
+            etapaGeneracionNubes++;
+            cantidadNubesEtapa += 1;
+        }
+
+        // No actualices el contador de puntos cuando el juego está en pausa
+        if (!isGamePaused) {
+            updateScoreLabel();
+        }
+
+        checkCollisions();
     }
-    if (tiempoJugado >= etapaGeneracionNubes * 120) {
-        etapaGeneracionNubes++;
-        cantidadNubesEtapa += 5; // Aumenta la cantidad de nubes en la siguiente etapa
-    }
-    updateScoreLabel();
-    checkCollisions();
+
+    // Renderiza la escena independientemente de si la pantalla de inicio es visible
     renderer.render(scene, camera);
 }
+
+
+
 
 function checkBounds() {
     avion.position.x = clamp(avion.position.x, minMov, maxMov);
@@ -193,6 +244,9 @@ function createPlane() {
         avion.position.set(0, 10, -300);
         avion.scale.set(5, 5, 5); // Escala el modelo según sea necesario
         scene.add(avion);
+        gltf.scene.traverse((ob) => {
+            if (ob.isObject3D) ob.castShadow = true;
+        });
     });
 }
 
@@ -240,10 +294,11 @@ function distance(obj1, obj2) {
 
 
 function handleCollision() {
+    console.log("Colisión detectada"); // Agrega esta línea para depuración
     isGameOver = true;
     isGamePaused = true;
     audio.play();
-    audioGame.pause()
+    audioGame.pause();
 
     // Crea un botón con estilo retro solo si el juego ha terminado
     if (isGameOver) {
@@ -267,6 +322,7 @@ function handleCollision() {
     }
 }
 
+
 function restartGame() {
     // Limpia la escena y el arreglo de nubes
     clouds.forEach((cloud) => {
@@ -275,29 +331,30 @@ function restartGame() {
     clouds.length = 0;
     scene.remove(avion);
 
-    audioBoton.play();
+    // Detén la música
+    audioGame.pause();
+    audioGame.currentTime = 0;
 
-    // Restablece las variables de juego
-    isGamePaused = false;
-    isGameOver = false; // Reinicia la variable de juego
-    score = 0;
-    cantidadNubesEtapa = 0;
-    etapaGeneracionNubes = 0;
-
-    renderer.dispose();
-
-    updateScoreLabel();
-
-    // Elimina el botón de reinicio
-    document.body.removeChild(restartButton);
-
-    if (!audioGame.paused) {
-        audioGame.pause();
-        audioGame.currentTime = 0; // Reinicia la reproducción al principio
-        audioGame.play();
+    // Elimina el botón de reinicio si existe
+    if (restartButton) {
+        document.body.removeChild(restartButton);
     }
 
+    // Reinicia el juego
+    isGameOver = false;
+    isGamePaused = false;
+    score = 0;
+    cantidadNubesEtapa = 1;
+    etapaGeneracionNubes = 0;
+    tiempoJugado = 0;
+    passedClouds.length = 0;
+    clouds.length = 0;
+    updateScoreLabel();
+    audioBoton.play()
+
+    // Vuelve a cargar la escena y comienza la música
     loadScene();
+    audioGame.play();
     render();
 }
 
@@ -315,7 +372,7 @@ function generarNubesAdicionales() {
     }
 
     // Aumenta la cantidad de nubes en la siguiente etapa
-    cantidadNubesEtapa += 5; // Puedes ajustar el aumento según tus preferencias
+    cantidadNubesEtapa += 1; // Puedes ajustar el aumento según tus preferencias
 }
 
 function AudioMute() {
@@ -345,6 +402,53 @@ function mute() {
         audioGame.muted = true; // Deshabilita el sonido si no está silenciado
     }
 }
+
+playButton.addEventListener("click", () => {
+    // Reiniciar el juego y la música
+    initialScreen.style.display = "none"; // Ocultar la pantalla de inicio
+    creditsScreen.style.display = "none"; // Ocultar la pantalla de créditos si está visible
+
+    if (isGameOver) {
+        // Si el juego ya ha terminado, restablece el juego
+        restartGame();
+    } else {
+        // Si es la primera vez que se inicia el juego, carga la escena y comienza la música
+        loadScene();
+        audioGame.play();
+    }
+});
+
+creditsButton.addEventListener("click", () => {
+    // Mostrar pantalla de créditos
+    creditsScreen.style.display = "flex";
+    // isGamePaused = true; // Pausar el juego mientras se ven los créditos
+});
+
+instructionsButton.addEventListener("click", () => {
+    // Mostrar pantalla de créditos
+    instructionsScreen.style.display = "flex";
+    // isGamePaused = true; // Pausar el juego mientras se ven los créditos
+});
+
+closeCreditsButton.addEventListener("click", () => {
+    // Ocultar la pantalla de créditos
+    creditsScreen.style.display = "none";
+
+    if (!isGamePaused) {
+        audioGame.play(); // Reanudar la música si el juego no estaba pausado
+    }
+    isGamePaused = false; // Reanudar el juego
+});
+
+closeCreditsButton2.addEventListener("click", () => {
+    // Ocultar la pantalla de créditos
+    instructionsScreen.style.display = "none";
+
+    if (!isGamePaused) {
+        audioGame.play(); // Reanudar la música si el juego no estaba pausado
+    }
+    isGamePaused = false; // Reanudar el juego
+});
 
 
 init();
