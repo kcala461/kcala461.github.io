@@ -38,65 +38,29 @@ function init() {
     camera.far = 7000
 
 
-    //Luces
-    const ambiental = new THREE.AmbientLight(0x222222)
-    scene.add(ambiental)
-    const direccional = new THREE.DirectionalLight(0xFFFFFF,0.3)
-    direccional.position.set(-1,1,-1)
-    direccional.castShadow = true
-
-    // const direccional2 = new THREE.DirectionalLight(0xFFFFFF,0.3)
-    // direccional.position.set(-1,1,-1)
-    // direccional.castShadow = true
-
-    scene.add(direccional)
-    // scene.add(direccional2)
+        // Luces: ambiente, direccional y focal
+        const ambiental = new THREE.AmbientLight(0x222222);
+        scene.add(ambiental);
     
-    const puntual = new THREE.PointLight(0xFFFFFF,0.5)
-    puntual.position.set(2,7,-4)
-    scene.add(puntual)
-
-
-    const puntual_2 = new THREE.PointLight(0xFFFFFF,0.5)
-    puntual.position.set(-2,7,4)
-    scene.add(puntual_2)
-
-    const focal = new THREE.SpotLight(0xFFFFFF,0.3)
-    focal.position.set(-50,400,4)
-    focal.target.position.set(-10,0,0)
-    focal.angle=Math.PI / 8
-    focal.penumbra=0.3
-    focal.castShadow=true
-    focal.shadow.camera.far=500
-    focal.shadow.camera.fov=500
-    scene.add(focal)
-
- 
-
-    scene.add(new THREE.CameraHelper(puntual.shadow.camera))
-
-    // scene.add(new THREE.CameraHelper(focal.shadow.camera))
-    // scene.add(new THREE.CameraHelper(puntual.shadow.camera))
-    // scene.add(new THREE.CameraHelper(direccional.shadow.camera))
-
-    direccional.castShadow = true;
-    direccional.shadow.mapSize.width = 1024;
-    direccional.shadow.mapSize.height = 1024;
-
-    // puntual.castShadow = true;
-    puntual.shadow.mapSize.width = 1024;
-    puntual.shadow.mapSize.height = 1024;
-    puntual.shadow.distance = 200;
-
-    // focal.castShadow = true;
-    focal.shadow.mapSize.width = 1024;
-    focal.shadow.mapSize.height = 1024;
+        const direccional = new THREE.DirectionalLight(0xFFFFFF,0.8);
+        direccional.position.set(-150,350,-150);
+        direccional.castShadow = true;
+        // helperDirec = new THREE.CameraHelper(direccional.shadow.camera);
+        // scene.add(helperDirec);
+        scene.add(direccional);
     
-        
+        const focal = new THREE.SpotLight(0xFFFFFF,0.3);
+        focal.position.set(-150,350,150);
+        focal.target.position.set(0,0,0);
+        focal.angle = Math.PI/4;
+        focal.penumbra = 0.3;
+        focal.castShadow = true;
+        focal.shadow.camera.far = 1000;
+        // helperFocal = new THREE.CameraHelper(focal.shadow.camera);
+        // scene.add(helperFocal);
+        scene.add(focal);
 
-    // const aspectRatio = window.innerWidth/window.innerHeight;
-    // setOrtoCameras(aspectRatio);
-    
+     
     const controls = new OrbitControls(camera, renderer.domElement);
 
     // Camaras 
