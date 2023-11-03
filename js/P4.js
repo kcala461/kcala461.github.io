@@ -38,11 +38,9 @@ function init() {
     camera.far = 7000
 
 
-  // Lighting
-    // ambient
+    // Sombras
     const ambiente = new THREE.AmbientLight( 0x404040, 0.5 );
     scene.add( ambiente );
-    // directional
     const direccional = new THREE.DirectionalLight( 0xffffff, 0.5 );
     direccional.position.set(0, 600, -500);
     direccional.target.position.set(0, 0, 0);
@@ -55,7 +53,6 @@ function init() {
     scene.add(direccional.target);
     scene.add(direccional);
     
-    // spot 1
     const puntual = new THREE.SpotLight('white', 0.3);
     puntual.position.set(500, 600, 0);
     puntual.target.position.set(0, 0, 0);
@@ -64,7 +61,6 @@ function init() {
     scene.add(puntual.target);
     scene.add(puntual);
 
-    // spot 2
     const puntual2 = new THREE.SpotLight('white', 0.3);
     puntual2.position.set(-500, 600, 0);
     puntual2.target.position.set(0, 0, 0);
