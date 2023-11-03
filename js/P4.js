@@ -38,27 +38,40 @@ function init() {
     camera.far = 7000
 
 
-        // Luces: ambiente, direccional y focal
-        const ambiental = new THREE.AmbientLight(0x222222);
-        scene.add(ambiental);
+  // Lighting
+    // ambient
+    const ambiente = new THREE.AmbientLight( 0x404040, 0.5 );
+    scene.add( ambiente );
+    // directional
+    const direccional = new THREE.DirectionalLight( 0xffffff, 0.5 );
+    direccional.position.set(0, 600, -500);
+    direccional.target.position.set(0, 0, 0);
+    direccional.shadow.camera.far = 2000; 
+    direccional.shadow.camera.left = -500;
+    direccional.shadow.camera.right = 500;
+    direccional.shadow.camera.top = 500;
+    direccional.shadow.camera.bottom = -500;
+    direccional.castShadow = true;
+    scene.add(direccional.target);
+    scene.add(direccional);
     
-        const direccional = new THREE.DirectionalLight(0xFFFFFF,0.8);
-        direccional.position.set(-150,350,-150);
-        direccional.castShadow = true;
-        // helperDirec = new THREE.CameraHelper(direccional.shadow.camera);
-        // scene.add(helperDirec);
-        scene.add(direccional);
-    
-        const focal = new THREE.SpotLight(0xFFFFFF,0.3);
-        focal.position.set(-150,350,150);
-        focal.target.position.set(0,0,0);
-        focal.angle = Math.PI/4;
-        focal.penumbra = 0.3;
-        focal.castShadow = true;
-        focal.shadow.camera.far = 1000;
-        // helperFocal = new THREE.CameraHelper(focal.shadow.camera);
-        // scene.add(helperFocal);
-        scene.add(focal);
+    // spot 1
+    const puntual = new THREE.SpotLight('white', 0.3);
+    puntual.position.set(500, 600, 0);
+    puntual.target.position.set(0, 0, 0);
+    puntual.shadow.camera.far = 2000; 
+    puntual.castShadow = true;
+    scene.add(puntual.target);
+    scene.add(puntual);
+
+    // spot 2
+    const puntual2 = new THREE.SpotLight('white', 0.3);
+    puntual2.position.set(-500, 600, 0);
+    puntual2.target.position.set(0, 0, 0);
+    puntual2.shadow.camera.far = 2000; 
+    puntual2.castShadow = true;
+    scene.add(puntual2.target);
+    scene.add(puntual2);
 
      
     const controls = new OrbitControls(camera, renderer.domElement);
